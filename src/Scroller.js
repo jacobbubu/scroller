@@ -70,12 +70,15 @@ var Scroller;
 
 			/** Increase or decrease the amount of friction applied to deceleration **/
 			decelerationRate: 0.95,
-			
+
 			/** This configures the amount of change applied to deceleration when reaching boundaries  **/
             penetrationDeceleration : 0.03,
 
             /** This configures the amount of change applied to acceleration when reaching boundaries  **/
-            penetrationAcceleration : 0.08
+            penetrationAcceleration : 0.08,
+
+			/** How long we wait between the touchend and the lastest touchmove **/
+			decelerationWait: 8e3
 
 		};
 
@@ -949,7 +952,7 @@ var Scroller;
 
 				// Start deceleration
 				// Verify that the last move detected was in some relevant time frame
-				if (self.__isSingleTouch && self.options.animating && (timeStamp - self.__lastTouchMove) <= 100) {
+				if (self.__isSingleTouch && self.options.animating && (timeStamp - self.__lastTouchMove) <= self.options.decelerationWait) {
 
 					// Then figure out what the scroll position was about 100ms ago
 					var positions = self.__positions;
@@ -957,7 +960,7 @@ var Scroller;
 					var startPos = endPos;
 
 					// Move pointer to position measured 100ms ago
-					for (var i = endPos; i > 0 && positions[i] > (self.__lastTouchMove - 100); i -= 3) {
+					for (var i = endPos; i > 0 && positions[i] > (self.__lastTouchMove - self.options.decelerationWait); i -= 3) {
 						startPos = i;
 					}
 
@@ -978,7 +981,7 @@ var Scroller;
 						var movedLeft = self.__scrollLeft - positions[startPos - 2];
 						var movedTop = self.__scrollTop - positions[startPos - 1];
 
-						// Based on 50ms compute the movement to apply for each render step
+						// Based on 16.67ms compute the movement to apply for each render step
 						self.__decelerationVelocityX = movedLeft / timeOffset * (1000 / 60);
 						self.__decelerationVelocityY = movedTop / timeOffset * (1000 / 60);
 
@@ -996,7 +999,7 @@ var Scroller;
 					} else {
 						self.options.scrollingComplete();
 					}
-				} else if ((timeStamp - self.__lastTouchMove) > 100) {
+				} else if ((timeStamp - self.__lastTouchMove) > self.options.decelerationWait) {
 					self.options.scrollingComplete();
 	 			}
 			}
@@ -1226,6 +1229,7 @@ var Scroller;
 				}
 
 				// Animate to grid when snapping is active, otherwise just fix out-of-boundary positions
+				self.__scrollTop = self.__maxDecelerationScrollTop;
 				self.scrollTo(self.__scrollLeft, self.__scrollTop, self.options.snapping);
 			};
 
@@ -1319,8 +1323,8 @@ var Scroller;
 				var scrollOutsideY = 0;
 
 				// This configures the amount of change applied to deceleration/acceleration when reaching boundaries
-				var penetrationDeceleration = self.options.penetrationDeceleration; 
-				var penetrationAcceleration = self.options.penetrationAcceleration; 
+				var penetrationDeceleration = self.options.penetrationDeceleration;
+				var penetrationAcceleration = self.options.penetrationAcceleration;
 
 				// Check limits
 				if (scrollLeft < self.__minDecelerationScrollLeft) {
