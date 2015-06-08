@@ -986,7 +986,7 @@ var Scroller;
 						self.__decelerationVelocityY = movedTop / timeOffset * (1000 / 60);
 
 						// How much velocity is required to start the deceleration
-						var minVelocityToStartDeceleration = self.options.paging || self.options.snapping ? 4 : 1;
+						var minVelocityToStartDeceleration = self.options.paging || self.options.snapping ? 4 : 0.1;
 
 						// Verify that we have enough velocity to start deceleration
 						if (Math.abs(self.__decelerationVelocityX) > minVelocityToStartDeceleration || Math.abs(self.__decelerationVelocityY) > minVelocityToStartDeceleration) {
